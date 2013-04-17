@@ -12,10 +12,19 @@
              :x2 1
              :y2 (/ 853 1136)
              :grid-width 1
-             :grid-height (/ (- 853 216) 1136)}})  ;note: these are in RATIOS, not actual pixel amounts.
+             :grid-height (/ (- 853 216) 1136)}
+   :ipad {:x1 0
+          :y1 (/ 95 1024)
+          :x2 1
+          :y2 (/ 862 1024)
+          :grid-width 1
+          :grid-height (/ (- 862 95) 1024)}})  ;note: these are in RATIOS, not actual pixel amounts.
 
 (def resolutions
-  {[640 1136] :iphone5})
+  {[640 1136] :iphone5
+   [768 1024] :ipad   ;iPad 1 / 2 / mini
+   [1536 2048] :ipad  ;iPad 3 / 4
+   })
 
 (defn color-of-cell
   [img phone-type cell-rows cell-cols cell-x cell-y]
