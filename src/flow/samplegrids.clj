@@ -1,4 +1,22 @@
 (ns flow.samplegrids)
+
+(def color-settings
+  {{:blue 0, :green 0, :red 255, :alpha 255} \a
+   {:blue 0, :green 130, :red 0, :alpha 255} \b
+   {:blue 255, :green 0, :red 0, :alpha 255} \c
+   {:blue 0, :green 235, :red 239, :alpha 255} \d
+   {:blue 0, :green 130, :red 255, :alpha 255} \e
+   {:blue 255, :green 255, :red 0, :alpha 255} \f
+   {:blue 255, :green 0, :red 255, :alpha 255} \g
+   {:blue 41, :green 44, :red 165, :alpha 255} \h
+   {:blue 132, :green 0, :red 123, :alpha 255} \i
+   {:blue 255, :green 255, :red 255, :alpha 255} \j
+   {:blue 165, :green 166, :red 165, :alpha 255} \k
+   {:blue 0, :green 255, :red 0, :alpha 255} \l
+   {:blue 107, :green 182, :red 189, :alpha 255} \m
+   {:blue 140, :green 0, :red 0, :alpha 255} \n
+   {:blue 123, :green 130, :red 0, :alpha 255} \o})
+
 (defn make-grid
   [list-of-strings]
   (vec (map vec (for [s list-of-strings]

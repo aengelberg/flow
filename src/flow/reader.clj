@@ -1,7 +1,8 @@
 (ns flow.reader
   (:import javax.imageio.ImageIO)
   (:import java.io.File)
-  (:use flow.imagelib))
+  (:use flow.imagelib)
+  (:use flow.samplegrids))
 
 ;(def img (read-image "sample14x14.png"))
 
@@ -58,8 +59,8 @@
   (let [grid (atom (vec (map vec (for [i (range cell-rows)]
                                    (for [j (range cell-cols)]
                                      \*)))))
-        color-map (atom {})
-        current-char (atom 97)]
+        color-map (atom color-settings)
+        current-char (atom 112)]
     (doseq
       [i (range cell-rows)
        j (range cell-cols)]
