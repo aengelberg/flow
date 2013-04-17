@@ -12,15 +12,31 @@
 (def the-board
   (atom
     [[\*]]))
+
+(def reversed-color-settings
+  (into {}
+        (for [[k v] color-settings]
+          [v k])))
+
 (defn random-hexcode []
   (apply str
          "#"
          (for [i (range 6)]
            (nth "56789ABCDEF" (rand-int 11)))))
+(defn get-hexcode [c]
+  (let [m (reversed-color-settings c)]
+    (if (not m)
+      (random-hexcode)
+      (apply str
+             "#"
+             (for [n [(m :red)(m :green)(m :blue)]]
+               (str
+                 (nth "0123456789ABCDEF" (quot n 16))
+                 (nth "0123456789ABCDEF" (rem n 16))))))))
 (def colormap
   (into {}
         (for [c "abcdefghijklmnopqrstuvwxyz"]
-          [c (color (random-hexcode))])))
+          [c (get-hexcode c)])))
 
 (defn pipe
   [cellX1 cellY1 cellX2 cellY2 cellWidth cellHeight]
@@ -32,44 +48,46 @@
 
 (defn draw-flow
   [g2d w h]
-  (let [board @the-board
-        rows (count board)
-        cols (count (nth board 0))
-        cell-width (/ w cols)
-        cell-height (/ h rows)
-        padding (* cell-width 0.1)
-        pipe-width (* cell-width 0.5)]
-    (doseq [i (range rows)
-            j (range cols)]
-      (let [item (get-in board [i j])
-            the-color (get colormap (lowcase item) (color :white))
-            x (* j cell-width)
-            y (* i cell-height)]
-        (draw g2d
-              (rect x y cell-width cell-height)
-              (style :foreground (color :white)
-                     :background (color :black)
-                     :stroke (stroke :width (* 0.01 cell-width))))
-        (if (and (not (= item \*))(< (count (filter #(= (lowcase item)(lowcase (get-in board %)))
-                                                    (quick-neighbors board [i j])))
-                                      2))
+  (if (= @the-board nil)
+    nil
+    (let [board @the-board
+          rows (count board)
+          cols (count (nth board 0))
+          cell-width (/ w cols)
+          cell-height (/ h rows)
+          padding (* cell-width 0.1)
+          pipe-width (* cell-width 0.5)]
+      (doseq [i (range rows)
+              j (range cols)]
+        (let [item (get-in board [i j])
+              the-color (get colormap (lowcase item) (color :white))
+              x (* j cell-width)
+              y (* i cell-height)]
           (draw g2d
-                (ellipse (+ x padding) (+ y padding) (- cell-width (* padding 2)) (- cell-height (* padding 2)))
-                (style :background the-color)))
-        ))
-    (doseq [i (range rows)
-            j (range cols)]
-      (let [item (get-in board [i j])
-            the-color (get colormap (lowcase item) (color :white))
-            neighs [[(inc i) j]
-                    [i (inc j)]]]
-        (doseq [[i2 j2] neighs]
-          (if (and (get-in board [i2 j2])
-                   (not (= item \*))
-                   (= (lowcase item)(lowcase (get-in board [i2 j2]))))
-            (draw g2d (pipe i j i2 j2 cell-width cell-height) (style :foreground the-color
-                                                                     :stroke (stroke :width pipe-width :cap :round)))
-          ))))))
+                (rect x y cell-width cell-height)
+                (style :foreground (color :white)
+                       :background (color :black)
+                       :stroke (stroke :width (* 0.01 cell-width))))
+          (if (and (not (= item \*))(< (count (filter #(= (lowcase item)(lowcase (get-in board %)))
+                                                    (quick-neighbors board [i j])))
+                                       2))
+            (draw g2d
+                  (ellipse (+ x padding) (+ y padding) (- cell-width (* padding 2)) (- cell-height (* padding 2)))
+                  (style :background the-color)))
+          ))
+      (doseq [i (range rows)
+              j (range cols)]
+        (let [item (get-in board [i j])
+              the-color (get colormap (lowcase item) (color :white))
+              neighs [[(inc i) j]
+                      [i (inc j)]]]
+          (doseq [[i2 j2] neighs]
+            (if (and (get-in board [i2 j2])
+                     (not (= item \*))
+                     (= (lowcase item)(lowcase (get-in board [i2 j2]))))
+              (draw g2d (pipe i j i2 j2 cell-width cell-height) (style :foreground the-color
+                                                                       :stroke (stroke :width pipe-width :cap :round)))
+              )))))))
 
 (def c (canvas :minimum-size [500 :by 500]
                :background "#FFFFFF"
@@ -88,6 +106,11 @@
                            #(let [board (:board %)]
                               (reset! the-board board)
                               (repaint! c))))
-
-;(time (solve-flow-graphic (file->grid "sample8x8.png" 8 8)))
-(time (solve-flow-graphic sample14x14))
+;(time (solve-flow-graphic (file->grid "photo.PNG" 14 14)))
+;(time (solve-flow-graphic (-> (for [i (range 8)]
+;                                (for [j (range 8)]
+;                                  \*))
+;                            (#(map vec %))
+;                            vec
+;                            (assoc-in [1 1] \a)
+;                            (assoc-in [6 6] \a))))
