@@ -290,20 +290,21 @@
   ;(print (. this board))
   (= 0 (:manhattan this)))
 (defn neighbors [this]
-  (let [quickfilled (check-empties this)]
-    (if (and quickfilled (isPossible this))
-      (if (isFinish this)
-        []
-        (or ;(. this update)
-          (if (= quickfilled true) false [quickfilled]) ;if quickfilled is true, just do the actual neighbors; otherwise, just return [quickfilled]
-            (let [stuff (into {} (for [[color [p1 p2]] (:posns this)
-                                       posn [p1 p2]]
-                                   [[color (if (= posn p1) 0 1)] (quick-neighbors (:board this) posn color)]))
-                  [[color n] neighs] (apply min-key #(count (nth % 1)) (seq stuff))]
-              (for [neigh neighs]
-                (let [newGame (makeGamePosn (:board this) (:posns this))]
-                  (expandPosn newGame color n neigh))))))
-      )))
+  (cond
+    (isFinish this) []
+    (not (isPossible this)) []
+    :else (let [quickfilled (check-empties this)]
+            (cond
+              (and quickfilled (not (= quickfilled true))) [quickfilled]
+              (not quickfilled) []
+              :else (let [stuff (into {} (for [[color [p1 p2]] (:posns this)
+                                               posn [p1 p2]]
+                                           [[color (if (= posn p1) 0 1)] (quick-neighbors (:board this) posn color)]))
+                          [[color n] neighs] (apply min-key #(count (nth % 1)) (seq stuff))]
+                      (for [neigh neighs]
+                        (let [newGame (makeGamePosn (:board this) (:posns this))]
+                          (expandPosn newGame color n neigh))))))
+    ))
 
 
 
