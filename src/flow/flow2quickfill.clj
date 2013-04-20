@@ -228,10 +228,10 @@
             (let [x2 (inc x1)
                   y2 (inc y1)]
               (or (= (get-in board [x1 y1]) \*)
-                  (not (= (get-in board [x1 y1])
-                          (get-in board [x1 y2])
-                          (get-in board [x2 y1])
-                          (get-in board [x2 y2]))))))))
+                  (not (= (lowcase (get-in board [x1 y1]))
+                          (lowcase (get-in board [x1 y2]))
+                          (lowcase (get-in board [x2 y1]))
+                          (lowcase (get-in board [x2 y2])))))))))
 
 (defn adjacent?
   "Takes two posns and tests whether they're adjacent"
