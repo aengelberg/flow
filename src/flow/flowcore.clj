@@ -168,8 +168,16 @@
             1)]
     (expandPosn this color n posn-to)))
 
-(defn check-empties
-  "Takes a GamePosn, and returns either another GamePosn (that has been 'quickfilled'), true (implying that it doesn't have an easy quickfill), or nil (implying that it's impossible)."
+(defn quickfill-search-helper
+  [l]
+  (loop [l l]
+      (cond
+        (empty? l) true
+        (= (first l) true) (recur (rest l))
+        (= (first l) false) false
+        :else (first l))))
+
+(defn empties-quickfill
   [gp]
   (let [board (:board gp)
         posns (:posns gp)
@@ -213,12 +221,49 @@
                 (= heads-count 4) (if dupe-color?
                                     true
                                     false))))]
-    (loop [l l]
-      (cond
-        (empty? l) true
-        (= (first l) true) (recur (rest l))
-        (= (first l) false) false
-        :else (first l)))))
+    (quickfill-search-helper l)))
+
+(defn double-empties-quickfill
+  [gp]
+  (let [{board :board posns :posns} gp
+        wall? (fn [x y] (or (not (get-in board [x y]))
+                            (not (lowcase? (get-in board [x y]))))) ; no \x or \*
+        l (for [x (range (count board))
+                y (range (count board))
+                :when (= (get-in board [x y]) \*)
+                [x2 y2] [[(inc x) y] [x (inc y)]]
+                :when (= (get-in board [x2 y2]) \*)]
+            (if (= x x2)
+              (if (and (wall? x (dec y))
+                       (wall? x (inc y2)))
+                (not (or (and (wall? (inc x) y)
+                              (wall? (inc x) y2))
+                         (and (wall? (dec x) y)
+                              (wall? (dec x) y2))))
+                true)
+              (if (and (wall? (dec x) y)
+                       (wall? (inc x2) y))
+                (not (or (and (wall? x (inc y))
+                              (wall? x2 (inc y)))
+                         (and (wall? x (dec y))
+                              (wall? x (dec y2)))))
+                true)))]
+    (quickfill-search-helper l)))
+
+(defn quickfill
+  "Takes a GamePosn, and returns either another GamePosn (that has been 'quickfilled'), true (implying that it doesn't have an easy quickfill), or nil (implying that it's impossible)."
+  ([gp optimizers]
+    (cond
+      (empty? optimizers) true
+      :else (let [optimized ((first optimizers) gp)]
+              (cond
+                (= optimized true) (recur gp (rest optimizers))
+                (= optimized false) false
+                :else optimized))))
+  ([gp]
+    (quickfill gp [empties-quickfill
+                   ;double-empties-quickfill
+                   ])))
 
 (defn check-for-bending
   [board]
@@ -283,7 +328,6 @@
 (defn isPossible [this]
   (and
     (check-uf this)
-    ;(check-empties (:board this))   (now covered in neighbors)
     (check-for-bending (:board this))
     ))
 (defn isFinish [this]
@@ -293,7 +337,7 @@
   (cond
     (isFinish this) []
     (not (isPossible this)) []
-    :else (let [quickfilled (check-empties this)]
+    :else (let [quickfilled (quickfill this)]
             (cond
               (and quickfilled (not (= quickfilled true))) [quickfilled]
               (not quickfilled) []
