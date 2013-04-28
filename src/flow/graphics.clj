@@ -2,7 +2,7 @@
   (:use seesaw.core
         seesaw.graphics
         seesaw.color)
-  (:use flow.flow2quickfill
+  (:use flow.flowcore
         flow.samplegrids
         flow.reader))
 

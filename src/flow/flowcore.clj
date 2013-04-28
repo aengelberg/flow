@@ -1,4 +1,4 @@
-(ns flow.flow2quickfill
+(ns flow.flowcore
   (:use flow.samplegrids)
   (:import java.util.PriorityQueue)
   (:import flow.java.UnionFind)
