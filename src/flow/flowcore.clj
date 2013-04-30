@@ -343,11 +343,15 @@
               (not quickfilled) []
               :else (let [stuff (into {} (for [[color [p1 p2]] (:posns this)
                                                posn [p1 p2]]
-                                           [[color (if (= posn p1) 0 1)] (quick-neighbors (:board this) posn color)]))
+                                           (let [n (if (= posn p1) 0 1)
+                                                 neighs (quick-neighbors (:board this) posn color)
+                                                 gameposns (for [neigh neighs]
+                                                             (let [newGame (makeGamePosn (:board this) (:posns this))]
+                                                               (expandPosn newGame color n neigh)))
+                                                 gameposns (filter isPossible gameposns)]
+                                             [[color (if (= posn p1) 0 1)] gameposns])))
                           [[color n] neighs] (apply min-key #(count (nth % 1)) (seq stuff))]
-                      (for [neigh neighs]
-                        (let [newGame (makeGamePosn (:board this) (:posns this))]
-                          (expandPosn newGame color n neigh))))))
+                      neighs)))
     ))
 
 
