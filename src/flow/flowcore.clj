@@ -226,7 +226,7 @@
 (defn double-empties-quickfill
   [gp]
   (let [{board :board posns :posns} gp
-        wall? (fn [x y] (or (not (get-in board [x y]))
+        wall? (fn [x y] (or (not (get-in board [x y])) ; no nil
                             (not (lowcase? (get-in board [x y]))))) ; no \x or \*
         l (for [x (range (count board))
                 y (range (count board))
@@ -246,7 +246,7 @@
                 (not (or (and (wall? x (inc y))
                               (wall? x2 (inc y)))
                          (and (wall? x (dec y))
-                              (wall? x (dec y2)))))
+                              (wall? x2 (dec y)))))
                 true)))]
     (quickfill-search-helper l)))
 
@@ -262,7 +262,7 @@
                 :else optimized))))
   ([gp]
     (quickfill gp [empties-quickfill
-                   ;double-empties-quickfill
+                   double-empties-quickfill
                    ])))
 
 (defn check-for-bending
