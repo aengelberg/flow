@@ -11,6 +11,31 @@
   [f]
   (.start (Thread. f)))
 
+(defmacro maybe
+  "Evaluates expr, or returns nil instead of an error."
+  ([expr]
+    `(try ~expr
+       (catch Exception e# nil)))
+  ([expr val]
+    `(try ~expr
+       (catch Exception e# ~val))))
+
+(defn check-grid
+  [grid]
+  "Returns the grid, or false."
+  (and (apply = (map count grid))
+       (not (= (count grid) 0))
+       (not (= (count (first grid)) 0))
+       (let [cpt (colorPosnTable grid)]
+         (every? (fn [[k v]] (= (count v) 2))
+                 cpt))
+       grid))
+
+(defn failure-message
+  [message]
+  (show! (pack! (dialog :type :error
+                        :content message))))
+
 (def input-board (text :multi-line? true
                        :text "A*B*D\n**C*E\n*****\n*B*D*\n*ACE*"
                        :minimum-size [500 :by 200]))
@@ -50,12 +75,20 @@
     (map string/lower-case)
     (map string/trim)
     (filter #(not (= % "")))
-    (map #(vec (string/replace % " " "*")))
+    (map #(string/replace % " " "*"))
+    (map vec)
     vec))
 
 (defn go
   []
-  (solve-flow-graphic (get-board-array)))
+  (let [board-array (maybe (check-grid (get-board-array)))]
+    (if (not board-array)
+      (failure-message "The typed-out grid appears to be invalid.")
+      (let [answer (maybe (solve-flow-graphic board-array) false)]
+        (cond
+          (= answer nil) (failure-message "The puzzle appears unsolvable (without bending).")
+          (= answer false) (failure-message "There was an error solving the puzzle.\n
+Please make sure it's correctly entered."))))))
 
 (def go-button (button :text "Go"
                        :listen [:action (fn [x] (on-thread
