@@ -4,6 +4,12 @@
   (:import flow.java.UnionFind)
   )
 
+(def ^:dynamic *thoroughness* 2)
+; 0 = don't do isPossible while counting neighbors
+; 1 = filter isPossible while counting neighbors
+; 2 = filter isPossible AND quickfill while counting neighbors
+; presumably, a higher thoroughness increases the time but decreases the growth.
+
 (defn lowcase
   [c]
   (first (clojure.string/lower-case c)))
@@ -348,10 +354,15 @@
                                                  gameposns (for [neigh neighs]
                                                              (let [newGame (makeGamePosn (:board this) (:posns this))]
                                                                (expandPosn newGame color n neigh)))
-                                                 gameposns (filter isPossible gameposns)]
+                                                 gameposns (case *thoroughness*
+                                                             0 gameposns
+                                                             1 (filter isPossible gameposns)
+                                                             2 (filter quickfill (filter isPossible gameposns)))]
                                              [[color (if (= posn p1) 0 1)] gameposns])))
                           [[color n] neighs] (apply min-key #(count (nth % 1)) (seq stuff))]
-                      neighs)))
+                      (if (= *thoroughness* 0)
+                        (filter isPossible neighs)
+                        neighs))))
     ))
 
 
