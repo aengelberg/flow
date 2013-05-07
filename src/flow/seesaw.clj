@@ -66,11 +66,11 @@
   []
   (let [n (Integer/parseInt (text resolution-num))
         filename (text in-file)
-        grid (try (file->grid filename n n)
-               (catch Exception e nil))]
+        grid (maybe (file->grid filename n n) nil)]
     (if grid
       (text! input-board (clojure.string/join "\n"
-                                              (map #(apply str %) grid))))))
+                                              (map #(apply str %) grid)))
+      (failure-message "There was an error interpreting the image."))))
 
 (def read-button (button :text "Interpret Image"
                          :listen [:action (fn [x] (read-the-image))]))
