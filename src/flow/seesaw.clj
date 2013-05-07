@@ -5,7 +5,8 @@
   (:use seesaw.core
         seesaw.mig
         seesaw.chooser)
-  (:require [clojure.string :as string]))
+  (:require [clojure.string :as string])
+  (:import java.util.GregorianCalendar))
 
 (defn on-thread
   [f]
@@ -21,8 +22,8 @@
        (catch Exception e# ~val))))
 
 (defn check-grid
-  [grid]
   "Returns the grid, or false."
+  [grid]
   (and (apply = (map count grid))
        (not (= (count grid) 0))
        (not (= (count (first grid)) 0))
@@ -31,10 +32,27 @@
                  cpt))
        grid))
 
+(defmacro time-val
+  "Like the macro 'time,' but instead RETURNS the time it took, in milliseconds."
+  [expr]
+  `(let [x# (.getTimeInMillis (GregorianCalendar.))
+         z# ~expr
+         y# (.getTimeInMillis (GregorianCalendar.))]
+     (- y# x#)))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;
+
 (defn failure-message
   [message]
   (show! (pack! (dialog :type :error
                         :content message))))
+
+(defn success-message
+  [message]
+  (show! (pack! (dialog :type :info
+                        :content message))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (def input-board (text :multi-line? true
                        :text "A*B*D\n**C*E\n*****\n*B*D*\n*ACE*"
@@ -84,11 +102,12 @@
   (let [board-array (maybe (check-grid (get-board-array)))]
     (if (not board-array)
       (failure-message "The typed-out grid appears to be invalid.")
-      (let [answer (maybe (solve-flow-graphic board-array) false)]
+      (let [answer (maybe (time-val (solve-flow-graphic board-array)) false)]
         (cond
           (= answer nil) (failure-message "The puzzle appears unsolvable (without bending).")
           (= answer false) (failure-message "There was an error solving the puzzle.\n
-Please make sure it's correctly entered."))))))
+Please make sure it's correctly entered.")
+          :else (success-message (str "Solved in " (double (/ answer 1000)) " seconds.")))))))
 
 (def go-button (button :text "Go"
                        :listen [:action (fn [x] (on-thread
