@@ -27,7 +27,7 @@
   (and (apply = (map count grid))
        (not (= (count grid) 0))
        (not (= (count (first grid)) 0))
-       (let [cpt (colorPosnTable grid)]
+       (let [cpt (color-posn-table grid)]
          (every? (fn [[k v]] (= (count v) 2))
                  cpt))
        grid))
