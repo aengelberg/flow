@@ -8,10 +8,6 @@
   (:require [clojure.string :as string])
   (:import java.util.GregorianCalendar))
 
-(defn on-thread
-  [f]
-  (.start (Thread. f)))
-
 (defmacro maybe
   "Evaluates expr, or returns nil instead of an error."
   ([expr]
@@ -27,7 +23,7 @@
   (and (apply = (map count grid))
        (not (= (count grid) 0))
        (not (= (count (first grid)) 0))
-       (let [cpt (colorPosnTable grid)]
+       (let [cpt (color-posn-table grid)]
          (every? (fn [[k v]] (= (count v) 2))
                  cpt))
        grid))

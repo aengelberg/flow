@@ -6,9 +6,9 @@
   )
 
 (def ^:dynamic *thoroughness* 2)
-; 0 = don't do is-possible while counting neighbors
-; 1 = filter is-possible while counting neighbors
-; 2 = filter is-possible AND quickfill while counting neighbors
+; 0 = don't do possible? while counting neighbors
+; 1 = filter possible? while counting neighbors
+; 2 = filter possible? AND quickfill while counting neighbors
 ; presumably, a higher thoroughness increases the time but decreases the growth.
 
 (defn on-thread
@@ -58,15 +58,15 @@
     @prom))
 
 (defn quick-span
-  ([start-vals neighbor-fn finish?-fn]
-    (quick-span (into clojure.lang.PersistentQueue/EMPTY start-vals) neighbor-fn finish?-fn #{}))
-  ([queue neighbor-fn finish?-fn visited]
+  ([start-vals neighbor-fn finished?-fn]
+    (quick-span (into clojure.lang.PersistentQueue/EMPTY start-vals) neighbor-fn finished?-fn #{}))
+  ([queue neighbor-fn finished?-fn visited]
     (cond
       (empty? queue) false
-      (finish?-fn (peek queue)) true
+      (finished?-fn (peek queue)) true
       :else (recur (into (pop queue)(filter #(not (visited %)) (neighbor-fn (peek queue))))
                    neighbor-fn
-                   finish?-fn
+                   finished?-fn
                    (conj visited (peek queue))))))
 
 (defn color-posn-table [board]
@@ -117,7 +117,7 @@
     (compare manhattan (:manhattan that)))
   )
 
-(declare make-GamePosn)
+(declare make-game-posn)
           
 
 (defn fixPosns [this] ;fix the posns map if there are two colliding same-color nodes
@@ -127,7 +127,8 @@
         (let [[color [p1 p1]] violating-color
               new-posns (dissoc (:posns this) color)
               new-board (assoc-in (:board this) p1 (upcase (get-in (:board this) p1)))]
-          (make-GamePosn new-board new-posns))
+          
+          (make-game-posn new-board new-posns))
         this)))
 
 (defn expandPosn [this color n neighbor]
@@ -136,7 +137,7 @@
   ;(print n)
   ;(print neighbor)
   (fixPosns
-    (make-GamePosn
+    (make-game-posn
       ;(print posns)
       (assoc-in 
         (assoc-in (:board this) (get-in (:posns this) [color n]) (upcase color))
@@ -311,18 +312,18 @@
                          (not (empty? intersect))))))
          (every? identity (vals @root-map)))))
 
-(defn is-possible [this]
+(defn possible? [this]
   (and
     (check-uf this)
     (check-for-bending (:board this))
     ))
-(defn is-finish? [this]
+(defn finished? [this]
   ;(print (. this board))
   (= 0 (:manhattan this)))
 (defn neighbors [this]
   (cond
-    (is-finish? this) []
-    (not (is-possible this)) []
+    (finished? this) []
+    (not (possible? this)) []
     :else (let [quickfilled (quickfill this)]
             (cond
               (and quickfilled (not (= quickfilled true))) [quickfilled]
@@ -332,22 +333,22 @@
                                            (let [n (if (= posn p1) 0 1)
                                                  neighs (quick-neighbors (:board this) posn color)
                                                  gameposns (for [neigh neighs]
-                                                             (let [newGame (make-GamePosn (:board this) (:posns this))]
+                                                             (let [newGame (make-game-posn (:board this) (:posns this))]
                                                                (expandPosn newGame color n neigh)))
                                                  gameposns (case *thoroughness*
                                                              0 gameposns
-                                                             1 (filter is-possible gameposns)
-                                                             2 (filter quickfill (filter is-possible gameposns)))]
+                                                             1 (filter possible? gameposns)
+                                                             2 (filter quickfill (filter possible? gameposns)))]
                                              [[color (if (= posn p1) 0 1)] gameposns])))
                           [[color n] neighs] (apply min-key #(count (nth % 1)) (seq stuff))]
                       (if (= *thoroughness* 0)
-                        (filter is-possible neighs)
+                        (filter possible? neighs)
                         neighs))))
     ))
 
 
 
-(defn make-GamePosn [board posns]
+(defn make-game-posn [board posns]
   (GamePosn. board posns (manhattan posns)))
 
 (defn displayreturn [i] (do (print i) i))
@@ -358,15 +359,15 @@
 
 (defn solve-flow
   [board]
-  (let [start (make-GamePosn board (color-posn-table board))
-        answer (first (astar-search-updating [start] #(neighbors %) #(is-finish? %) nil))]
+  (let [start (make-game-posn board (color-posn-table board))
+        answer (first (astar-search-updating [start] #(neighbors %) #(finished? %) nil))]
     (if answer
       (all-lowcase (:board answer)))))
 
 (defn solve-flow-updating
   [board update-fn]
-  (let [start (make-GamePosn board (color-posn-table board))
-        answer (first (astar-search-updating [start] #(neighbors %) #(is-finish? %) update-fn))]
+  (let [start (make-game-posn board (color-posn-table board))
+        answer (first (astar-search-updating [start] #(neighbors %) #(finished? %) update-fn))]
     (if answer
       (all-lowcase (:board answer)))))
 
