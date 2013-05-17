@@ -8,10 +8,6 @@
   (:require [clojure.string :as string])
   (:import java.util.GregorianCalendar))
 
-(defn on-thread
-  [f]
-  (.start (Thread. f)))
-
 (defmacro maybe
   "Evaluates expr, or returns nil instead of an error."
   ([expr]
@@ -66,7 +62,7 @@
   []
   (let [n (Integer/parseInt (text resolution-num))
         filename (text in-file)
-        grid (maybe (file->grid filename n n) nil)]
+        grid (maybe (file->grid filename n) nil)]
     (if grid
       (text! input-board (clojure.string/join "\n"
                                               (map #(apply str %) grid)))
