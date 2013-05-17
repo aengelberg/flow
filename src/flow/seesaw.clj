@@ -1,6 +1,7 @@
 (ns flow.seesaw
   (:use flow.graphics
-        flow.flowcore
+        flow.flowcore.core
+        flow.flowcore.base
         flow.reader)
   (:use seesaw.core
         seesaw.mig
