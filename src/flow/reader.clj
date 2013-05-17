@@ -8,14 +8,15 @@
 
 (def specs
   "Maps iOS types (plus whether or not they have ads turned on) to the y value of the top edge of the grid."
-  {[:iphone5 true] (/ 216 1136)
+  {[:iphone4 true] (/ 64 480)
+   [:iphone4 false] (/ 180 960)
+   [:iphone5 true] (/ 216 1136)
    [:ipad true] (/ 95 1024)})  ;note: these are in RATIOS, not actual pixel amounts.
 
-(def resolutions
-  {[640 1136] :iphone5
-   [768 1024] :ipad   ;iPad 1 / 2 / mini
-   [1536 2048] :ipad  ;iPad 3 / 4
-   })
+(def ratios
+  {(/ 640 1136) :iphone5
+   (/ 320 480) :iphone4
+   (/ 768 1024) :ipad})
 
 (defn color-of-cell
   [img puzzle-size cell-x cell-y {phone-type :phone-type, ads? :ads?}]
@@ -74,8 +75,10 @@
 
 (defn get-phone-type
   [img]
-  (resolutions [(.getWidth img)
-                (.getHeight img)]))
+  (let [ratio (/ (.getWidth img)
+                 (.getHeight img))]
+    (or (ratios ratio)
+        (throw (Exception. (str "ratio  " ratio " not recognized"))))))
 
 (defn file->grid
   "Takes a filename of an image, a phone type (:iphone, :iphone5, or :ipad), and the width and height of the grid, and returns a solvable flow grid.
