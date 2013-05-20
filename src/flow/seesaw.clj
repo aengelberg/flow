@@ -7,7 +7,12 @@
         seesaw.mig
         seesaw.chooser)
   (:require [clojure.string :as string])
-  (:import java.util.GregorianCalendar))
+  (:import java.util.GregorianCalendar)
+  (:gen-class))
+
+(def ^:dynamic *compile-gui*
+  "Change this to false when NOT compiling the program into a jar."
+  true)
 
 (defmacro maybe
   "Evaluates expr, or returns val (or nil by default) if an error occurs."
@@ -149,6 +154,10 @@ Please make sure it's correctly entered.")
 (defn -main
   [& args]
   (let [m (mig-panel :items mig-content)
-        f (frame :content m)]
+        f (case *compile-gui*
+            false (frame :content m)
+            true (frame :content m :on-close :exit))]
     (show! (pack! f))))
-(-main)
+
+(if-not *compile-gui*
+  (-main))
