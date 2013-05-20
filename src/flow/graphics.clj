@@ -103,10 +103,10 @@
   [board]
   (reset! the-board board)
   (show! (pack! f))
-  (solve-flow-updating @the-board
-                           #(let [board (:board %)]
-                              (reset! the-board board)
-                              (repaint! c))))
+  (solve-flow @the-board
+              :update-fn #(let [board (:board %)]
+                            (reset! the-board board)
+                            (repaint! c))))
 ;(time (solve-flow-graphic (file->grid "photo.PNG" 14 14)))
 ;(time (solve-flow-graphic (-> (for [i (range 8)]
 ;                                (for [j (range 8)]
