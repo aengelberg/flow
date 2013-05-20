@@ -100,15 +100,16 @@
 ;(repaint! c)
 
 (defn solve-flow-graphic
-  [board]
+  [board & args]
   (reset! the-board board)
   (show! (pack! f))
   (let [updater (fn [board] 
                   (reset! the-board board)
                   (repaint! c))
-        board (solve-flow @the-board
-                          :update-fn #(let [board (:board %)]
-                                        (updater board)))]
+        board (apply solve-flow @the-board
+                     :update-fn #(let [board (:board %)]
+                                   (updater board))
+                     args)]
     (Thread/sleep 200)
     (when board
       (updater board))

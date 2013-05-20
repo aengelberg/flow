@@ -89,6 +89,9 @@
 (def browse-button (button :text "..."
                            :listen [:action (fn [x] (browse-file))]))
 
+(def n-threads (text :text "1"
+                     :columns 3))
+
 (defn get-board-array
   []
   (->> (text input-board)
@@ -105,7 +108,10 @@
   (let [board-array (maybe (check-grid (get-board-array)))]
     (if (not board-array)
       (failure-message "The typed-out grid appears to be invalid.")
-      (let [answer (maybe (time-val (solve-flow-graphic board-array)) false)]
+      (let [n-threads (try (Integer/parseInt (text n-threads))
+                        (catch Exception e 1))
+            answer (maybe (time-val (solve-flow-graphic board-array
+                                                        :threads n-threads)) false)]
         (cond
           (= answer nil) (failure-message "The puzzle appears unsolvable (without bending).")
           (= answer false) (failure-message "There was an error solving the puzzle.\n
@@ -128,6 +134,8 @@ Please make sure it's correctly entered.")
    ["Does your version of Flow have ads?"]
    [ads? "wrap"]
    [read-button "wrap"]
+   ["How many threads?"]
+   [n-threads "wrap"]
    [go-button "span, align center"]])
 
 (defn -main

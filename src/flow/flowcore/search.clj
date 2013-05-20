@@ -21,11 +21,12 @@
   [& {start-vals :start-vals
       neighbors :neighbors
       finished? :finished?
-      update-fn :update-fn}]
+      update-fn :update-fn
+      threads :threads}]
   (let [queue (PriorityBlockingQueue.)
         prom (promise)]
     (doseq [thing start-vals]
       (.offer queue thing))
-    (dotimes [i 3]
+    (dotimes [i threads]
       (on-thread #(astar-search-helper queue neighbors finished? update-fn prom)))
     @prom))
