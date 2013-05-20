@@ -19,4 +19,7 @@
 
 ;(batch-do "/home/alex/temp/Flowpuzzles/11x11/" 11 11)
 
-(time (solve-flow-graphic (file->grid "/home/alex/temp/Flowpuzzles/11x11/IMG_1391.PNG" 11 11)))
+;(time (solve-flow-graphic (file->grid "/home/alex/temp/Flowpuzzles/11x11/IMG_1391.PNG" 11 11)))
+
+(binding [flow.seesaw/*compile-gui* false]
+  (flow.seesaw/-main))
