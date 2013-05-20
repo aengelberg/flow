@@ -106,9 +106,9 @@
   (let [updater (fn [board] 
                   (reset! the-board board)
                   (repaint! c))
-        board (solve-flow-updating @the-board
-                                   #(let [board (:board %)]
-                                      (updater board)))]
+        board (solve-flow @the-board
+                          :update-fn #(let [board (:board %)]
+                                        (updater board)))]
     (Thread/sleep 200)
     (when board
       (updater board))

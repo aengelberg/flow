@@ -100,16 +100,13 @@
     ))
 
 (defn solve-flow
-  [board]
-  (let [start (make-game-posn board (color-posn-table board))
-        answer (first (astar-search-updating [start] #(neighbors %) #(finished? %) nil))]
-    (if answer
-      (all-lowcase (:board answer)))))
-
-(defn solve-flow-updating
-  [board update-fn]
-  (let [start (make-game-posn board (color-posn-table board))
-        answer (first (astar-search-updating [start] #(neighbors %) #(finished? %) update-fn))]
+  [board & {:as args}]
+  (let [update-fn (:update-fn args)
+        start (make-game-posn board (color-posn-table board))
+        answer (first (astar-search-updating :start-vals [start]
+                                             :neighbors #(neighbors %)
+                                             :finished? #(finished? %)
+                                             :update-fn update-fn))]
     (if answer
       (all-lowcase (:board answer)))))
 

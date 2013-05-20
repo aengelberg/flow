@@ -3,12 +3,6 @@
   (:import java.util.concurrent.PriorityBlockingQueue
            java.util.concurrent.TimeUnit))
 
-(defn make-queue
-  [breadth?]
-  (cond
-    (= breadth? :breadth) clojure.lang.PersistentQueue/EMPTY
-    (= breadth? :depth) []))
-
 (defn astar-search-helper
   [queue neighbor-fn finish?-fn update-fn prom]
   (loop []
@@ -24,11 +18,14 @@
                 (recur))))))
 
 (defn astar-search-updating
-  [start-vals neighbor-fn finish?-fn update-fn]
+  [& {start-vals :start-vals
+      neighbors :neighbors
+      finished? :finished?
+      update-fn :update-fn}]
   (let [queue (PriorityBlockingQueue.)
         prom (promise)]
     (doseq [thing start-vals]
       (.offer queue thing))
     (dotimes [i 3]
-      (on-thread #(astar-search-helper queue neighbor-fn finish?-fn update-fn prom)))
+      (on-thread #(astar-search-helper queue neighbors finished? update-fn prom)))
     @prom))

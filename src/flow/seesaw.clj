@@ -57,13 +57,19 @@
 
 (def in-file (text :text "screenshot.png" :columns 15))
 
+(def ads? (combobox :model ["Yes" "No"]))
+
 (def resolution-num (text :text "5" :columns 3))
 
 (defn read-the-image
   []
   (let [n (Integer/parseInt (text resolution-num))
+        ads? (case (value ads?)
+               "Yes" true
+               "No" false)
         filename (text in-file)
-        grid (maybe (file->grid filename n) nil)]
+        grid (maybe (file->grid filename n
+                                :ads? ads?) nil)]
     (if grid
       (text! input-board (clojure.string/join "\n"
                                               (map #(apply str %) grid)))
@@ -117,8 +123,10 @@ Please make sure it's correctly entered.")
    ["Option 2: Enter a filename to a screenshot from your phone:" "span, wrap"]
    [in-file]
    [browse-button "wrap"]
-   ["and enter the board size of the flow puzzle (e.g. \"5\")" "span, wrap"]
+   ["What's the puzzle board size?"]
    [resolution-num "wrap"]
+   ["Does your version of Flow have ads?"]
+   [ads? "wrap"]
    [read-button "wrap"]
    [go-button "span, align center"]])
 

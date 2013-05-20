@@ -86,7 +86,9 @@ Optional (but useful): set :ads? to false if the user has ads turned off, i.e. t
 in the position of the grid on the screen.)"
   [filename puzzle-size & {ads? :ads?}]
   (let [img (read-image filename)
-        ads? (or ads? true)]
+        ads? (case ads?
+               nil true
+               ads?)]
     (image->grid
       img
       puzzle-size
