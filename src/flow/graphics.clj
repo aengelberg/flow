@@ -110,9 +110,6 @@
                      :update-fn #(let [board (:board %)]
                                    (updater board))
                      args)]
-    (Thread/sleep 200)
-    (when board
-      (updater board))
     board))
 ;(time (solve-flow-graphic (file->grid "photo.PNG" 14 14)))
 ;(time (solve-flow-graphic (-> (for [i (range 8)]

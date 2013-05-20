@@ -7,7 +7,8 @@
   [queue neighbor-fn finish?-fn update-fn prom]
   (loop []
     (let [peeked (.poll queue 1000 TimeUnit/MILLISECONDS)
-          _ (if peeked
+          _ (if (and peeked
+                     (not (realized? prom)))
               ((or update-fn identity) peeked))]
       (cond
         (realized? prom) nil
