@@ -14,6 +14,7 @@
 ; presumably, a higher thoroughness increases the time but decreases the growth.
 
 (defn check-for-bending
+  "Checks if none of the paths are 'bending,' i.e. there isn't a two-by-two area consisting only of any one color."
   [board]
   (every? identity
           (for [x1 (range (dec (count board)))
@@ -27,6 +28,7 @@
                           (lowcase (get-in board [x2 y2])))))))))
 
 (defn check-uf
+  "Uses a union-find algorithm to see if all colors are not blocked from eventually meeting each other."
   [this]
   (let [board (:board this)
         rows (count board)
@@ -65,15 +67,21 @@
                          (not (empty? intersect))))))
          (every? identity (vals @root-map)))))
 
-(defn possible? [this]
+(defn possible?
+  "Returns false if this board can't lead to a solution. Ideally returns false early on when the solver is on the wrong path."
+  [this]
   (and
     (check-uf this)
     (check-for-bending (:board this))
     ))
-(defn finished? [this]
+(defn finished?
+  "Is this GamePosn the final board position?"
+  [this]
   ;(print (. this board))
   (= 0 (:manhattan this)))
-(defn neighbors [this]
+(defn neighbors
+  "One of the most important pieces of the program; takes a GamePosn and expands it into 0 or more items to enqueue."
+  [this]
   (cond
     (finished? this) []
     (not (possible? this)) []
@@ -100,6 +108,7 @@
     ))
 
 (defn solve-flow
+  "Takes a board and solves it. Optionally takes :threads (default 1) and :update-fn to call on each dequeued item."
   [board & {:as args}]
   (let [update-fn (:update-fn args)
         threads (or (:threads args) 1)

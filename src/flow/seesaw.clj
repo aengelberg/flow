@@ -10,7 +10,7 @@
   (:import java.util.GregorianCalendar))
 
 (defmacro maybe
-  "Evaluates expr, or returns nil instead of an error."
+  "Evaluates expr, or returns val (or nil by default) if an error occurs."
   ([expr]
     `(try ~expr
        (catch Exception e# nil)))
@@ -19,7 +19,7 @@
        (catch Exception e# ~val))))
 
 (defn check-grid
-  "Returns the grid, or false."
+  "Sanity-checks the grid before solving. Returns the grid, or false."
   [grid]
   (and (apply = (map count grid))
        (not (= (count grid) 0))
@@ -62,23 +62,27 @@
 (def resolution-num (text :text "5" :columns 3))
 
 (defn read-the-image
+  "The callback function for the Interpret Image button"
   []
-  (let [n (Integer/parseInt (text resolution-num))
-        ads? (case (value ads?)
-               "Yes" true
-               "No" false)
-        filename (text in-file)
-        grid (maybe (file->grid filename n
-                                :ads? ads?) nil)]
-    (if grid
-      (text! input-board (clojure.string/join "\n"
-                                              (map #(apply str %) grid)))
-      (failure-message "There was an error interpreting the image."))))
+  (let [n (maybe (Integer/parseInt (text resolution-num)))]
+    (if n
+      (let [ads? (case (value ads?)
+                   "Yes" true
+                   "No" false)
+            filename (text in-file)
+            grid (maybe (file->grid filename n
+                                    :ads? ads?) nil)]
+        (if grid
+          (text! input-board (clojure.string/join "\n"
+                                                  (map #(apply str %) grid)))
+          (failure-message "There was an error interpreting the image.")))
+      (failure-message "The grid size must be a number."))))
 
-(def read-button (button :text "Interpret Image"
-                         :listen [:action (fn [x] (read-the-image))]))
+(def interpret-image-button (button :text "Interpret Image"
+                                    :listen [:action (fn [x] (read-the-image))]))
 
 (defn browse-file
+  "The callback function for the ... button"
   []
   (choose-file :filters [["Images" ["png" "jpeg"]]]
                :success-fn (fn [fc file] (text! in-file (.getAbsolutePath file)))
@@ -93,6 +97,7 @@
                      :columns 3))
 
 (defn get-board-array
+  "Fetches the text from the input-board text field and applies various filters on it"
   []
   (->> (text input-board)
     string/split-lines
@@ -110,8 +115,11 @@
       (failure-message "The typed-out grid appears to be invalid.")
       (let [n-threads (try (Integer/parseInt (text n-threads))
                         (catch Exception e 1))
-            answer (maybe (time-val (solve-flow-graphic board-array
-                                                        :threads n-threads)) false)]
+            answer (maybe
+                     (time-val (solve-flow-graphic board-array
+                                                        :threads n-threads))
+                     false)
+            ]
         (cond
           (= answer nil) (failure-message "The puzzle appears unsolvable (without bending).")
           (= answer false) (failure-message "There was an error solving the puzzle.\n
@@ -133,7 +141,7 @@ Please make sure it's correctly entered.")
    [resolution-num "wrap"]
    ["Does your version of Flow have ads?"]
    [ads? "wrap"]
-   [read-button "wrap"]
+   [interpret-image-button "wrap"]
    ["How many threads?"]
    [n-threads "wrap"]
    [go-button "span, align center"]])
