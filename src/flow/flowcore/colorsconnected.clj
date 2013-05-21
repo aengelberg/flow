@@ -45,16 +45,17 @@
       (let [comps (set (for [neigh (quick-neighbors board posn)
                              :when (components neigh)]
                          (components neigh)))]
-        (doseq [comp comps]
-          (swap! comp->colors assoc comp (conj (or (@comp->colors comp) ())
-                                             color)))
         (swap! posn->comps assoc posn comps)))
     ;(println comp->colors posn->comps)
     (and
       (every? identity (for [[color [p1 p2]] posns
                              :when (not (adjacent? p1 p2))]
-                         (not (empty? (clojure.set/intersection
-                                        (@posn->comps p1) (@posn->comps p2))))))
+                         (let [intersect (clojure.set/intersection
+                                           (@posn->comps p1) (@posn->comps p2))]
+                           (doseq [comp intersect]
+                             (swap! comp->colors assoc comp (conj (or (@comp->colors comp)
+                                                                      #{})
+                                                                  color)))
+                           (not (empty? intersect)))))
       (every? identity (for [[comp colors] @comp->colors]
-                         (let [freqs (frequencies colors)]
-                           (= (apply max (vals freqs)) 2)))))))
+                         (not (empty? colors)))))))
