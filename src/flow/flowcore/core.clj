@@ -2,9 +2,9 @@
   (:use flow.samplegrids
         flow.flowcore.base
         flow.flowcore.search
-        flow.flowcore.quickfill)
+        flow.flowcore.quickfill
+        flow.flowcore.colorsconnected)
   (:import java.util.PriorityQueue)
-  (:import flow.java.UnionFind)
   )
 
 (def ^:dynamic *thoroughness* 2)
@@ -27,51 +27,11 @@
                           (lowcase (get-in board [x2 y1]))
                           (lowcase (get-in board [x2 y2])))))))))
 
-(defn check-uf
-  "Uses a union-find algorithm to see if all colors are not blocked from eventually meeting each other."
-  [this]
-  (let [board (:board this)
-        rows (count board)
-        cols (count (nth board 0))
-        posns (:posns this)
-        uf (UnionFind. (* rows cols))
-        root-map (atom {})
-        get-val (fn [i j]
-                  (+ j (* i rows)))]
-    (doseq [i (range rows)
-            j (range cols)
-            [i2 j2] [[(inc i) j]
-                     [i (inc j)]]
-            :when (and (= (get-in board [i j]) \*)
-                       (= (get-in board [i2 j2] nil) \*))]
-      (.connect uf (get-val i j)(get-val i2 j2)))
-    (doseq [i (range rows)
-            j (range cols)
-            :when (let [v (get-val i j)]
-                    (and
-                      (= (get-in board [i j]) \*)
-                      (= v (get (.array uf) v))))]
-      (swap! root-map assoc (get-val i j) false))
-    (and (every? identity
-                 (for [[color [[x1 y1][x2 y2]]] posns]
-                   (or (adjacent? [x1 y1][x2 y2])
-                       (let [roots1 (for [[i j] (quick-neighbors board [x1 y1])
-                                          :when (= (get-in board [i j]) \*)]
-                                      (.findRoot uf (get-val i j)))
-                             roots2 (for [[i j] (quick-neighbors board [x2 y2])
-                                          :when (= (get-in board [i j]) \*)]
-                                      (.findRoot uf (get-val i j)))
-                             intersect (clojure.set/intersection (set roots1) (set roots2))]
-                         (doseq [root intersect]
-                           (swap! root-map assoc root true))
-                         (not (empty? intersect))))))
-         (every? identity (vals @root-map)))))
-
 (defn possible?
   "Returns false if this board can't lead to a solution. Ideally returns false early on when the solver is on the wrong path."
   [this]
   (and
-    (check-uf this)
+    (colors-connected? this)
     (check-for-bending (:board this))
     ))
 (defn finished?
