@@ -22,7 +22,7 @@
                           (.offer queue neigh))
                       (recur)))))))))
 
-(defn astar-search-updating
+(defn astar-search
   [& {start-val :start-val
       neighbors :neighbors
       finished? :finished?
