@@ -73,11 +73,11 @@
   (let [update-fn (:update-fn args)
         threads (or (:threads args) 1)
         start (make-game-posn board (color-posn-table board))
-        answer (first (astar-search-updating :start-vals [start]
-                                             :neighbors #(neighbors %)
-                                             :finished? #(finished? %)
-                                             :update-fn update-fn
-                                             :threads threads))]
+        answer (astar-search-updating :start-val start
+                                      :neighbors #(neighbors %)
+                                      :finished? #(finished? %)
+                                      :update-fn update-fn
+                                      :threads threads)]
     (if answer
       (all-lowcase (:board answer)))))
 

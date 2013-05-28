@@ -17,13 +17,13 @@
           (do
             (dosync (ref-set bored (assoc @bored my-id false)))
             (cond
-              (finish?-fn peeked) (deliver prom [peeked])
+              (finish?-fn peeked) (deliver prom peeked)
               :else (do (doseq [neigh (neighbor-fn peeked)]
                           (.offer queue neigh))
                       (recur)))))))))
 
 (defn astar-search-updating
-  [& {start-vals :start-vals
+  [& {start-val :start-val
       neighbors :neighbors
       finished? :finished?
       update-fn :update-fn
@@ -32,8 +32,7 @@
         prom (promise)
         threads (or threads 1)
         bored (ref (vec (repeat threads false)))]
-    (doseq [thing start-vals]
-      (.offer queue thing))
+    (.offer queue start-val)
     (dotimes [i threads]
       (on-thread #(astar-search-helper queue neighbors finished? update-fn prom bored i)))
     @prom))

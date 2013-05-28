@@ -1,6 +1,7 @@
 (ns flow.core
   (:use flow.reader
-        flow.graphics))
+        flow.graphics)
+  (:require flow.seesaw))
 
 (defn batch-do
   [folder x y]
