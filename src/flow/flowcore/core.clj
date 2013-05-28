@@ -7,7 +7,7 @@
   (:import java.util.PriorityQueue)
   )
 
-(def ^:dynamic *thoroughness* 2)
+(def ^:dynamic *thoroughness* 0)
 ; 0 = don't do possible? while counting neighbors
 ; 1 = filter possible? while counting neighbors
 ; 2 = filter possible? AND quickfill while counting neighbors
@@ -45,27 +45,22 @@
   (cond
     (finished? this) []
     (not (possible? this)) []
-    :else (let [quickfilled (quickfill this)]
-            (cond
-              (and quickfilled (not (= quickfilled true))) [quickfilled]
-              (not quickfilled) []
-              :else (let [stuff (into {} (for [[color [p1 p2]] (:posns this)
-                                               posn [p1 p2]]
-                                           (let [n (if (= posn p1) 0 1)
-                                                 neighs (quick-neighbors (:board this) posn color)
-                                                 gameposns (for [neigh neighs]
-                                                             (let [newGame (make-game-posn (:board this) (:posns this))]
-                                                               (expandPosn newGame color n neigh)))
-                                                 gameposns (case *thoroughness*
-                                                             0 gameposns
-                                                             1 (filter possible? gameposns)
-                                                             2 (filter quickfill (filter possible? gameposns)))]
-                                             [[color (if (= posn p1) 0 1)] gameposns])))
-                          [[color n] neighs] (apply min-key #(count (nth % 1)) (seq stuff))]
-                      (if (= *thoroughness* 0)
-                        (filter possible? neighs)
-                        neighs))))
-    ))
+    :else (let [stuff (into {} (for [[color [p1 p2]] (:posns this)
+                                     posn [p1 p2]]
+                                 (let [n (if (= posn p1) 0 1)
+                                       neighs (quick-neighbors (:board this) posn color)
+                                       gameposns (for [neigh neighs]
+                                                   (let [newGame (make-game-posn (:board this) (:posns this))]
+                                                     (expandPosn newGame color n neigh)))
+                                       gameposns (case *thoroughness*
+                                                   0 gameposns
+                                                   1 (filter possible? gameposns)
+                                                   2 (filter this (filter possible? gameposns)))]
+                                   [[color (if (= posn p1) 0 1)] gameposns])))
+                [[color n] neighs] (apply min-key #(count (nth % 1)) (seq stuff))]
+            (if (= *thoroughness* 0)
+              (filter possible? neighs)
+              neighs))))
 
 (defn solve-flow
   "Takes a board and solves it. Optionally takes :threads (default 1) and :update-fn to call on each dequeued item."
