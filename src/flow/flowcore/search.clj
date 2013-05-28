@@ -2,19 +2,18 @@
   (:import java.util.PriorityQueue))
 
 (defn astar-search-updating
-  [& {start-vals :start-vals
+  [& {start-val :start-val
       neighbors :neighbors
       finished? :finished?
       update-fn :update-fn}]
   (let [queue (PriorityQueue.)]
-    (doseq [thing start-vals]
-      (.offer queue thing))
+    (.offer queue start-val)
     (loop []
       (let [peeked (.poll queue)
             _ ((or update-fn identity) peeked)]
         (cond
           (not peeked) nil
-          (finished? peeked) [peeked]
+          (finished? peeked) peeked
           :else (do (doseq [neigh (neighbors peeked)]
                       (.offer queue neigh))
                   (recur)))))))
