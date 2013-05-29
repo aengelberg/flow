@@ -48,6 +48,4 @@
     (binding [*out* output-port]
       (get-stats))))
 
-(log-stats "benchmarks_master_thorough2.log")
-
 ;(time (solve-flow-graphic (file->grid "/home/alex/temp/Flowpuzzles/11x11/IMG_1391.PNG" 11 11)))
