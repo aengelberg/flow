@@ -37,7 +37,10 @@
   ;(println this)
   (let [{board :board posns :posns} this
         components (connected-components board)
-        comp->colors (atom {})
+        comp->colors (atom (into {}
+                                 (map vector
+                                      (distinct (vals components))
+                                      (repeat #{}))))
         posn->comps (atom {})]
     (doseq [[color [posn1 posn2]] posns
             :when (not (adjacent? posn1 posn2))

@@ -35,10 +35,10 @@
              (+ (abs (- x1 x2))(abs (- y1 y2))))))
 
 (defn color-posn-table [board]
-  (apply merge-with vector
+  (apply merge-with #(vec (apply concat %&))
          (for [i (range (count board))
                j (range (count (first board))) :when (not (= (get-in board [i j]) \*))]
-           {(lowcase (get-in board [i j])) [i j]})))
+           {(lowcase (get-in board [i j])) [[i j]]})))
 
 (defn quick-neighbors
   ([board posn color]
