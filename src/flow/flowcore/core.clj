@@ -6,8 +6,6 @@
         flow.flowcore.colorsconnected)
   (:import java.util.PriorityQueue)
   )
-
-(def ^:dynamic *thoroughness* 0)
 ; 0 = don't do possible? while counting neighbors
 ; 1 = filter possible? while counting neighbors
 ; presumably, a higher thoroughness increases the time but decreases the growth.
@@ -50,17 +48,10 @@
                                        neighs (quick-neighbors (:board this) posn color)
                                        gameposns (for [neigh neighs]
                                                    (let [newGame (make-game-posn (:board this) (:posns this))]
-                                                     (expandPosn newGame color n neigh)))
-                                       gameposns (case *thoroughness*
-                                                   0 gameposns
-                                                   1 (filter possible? gameposns)
-                                                   ;thoroughness of 2 doesn't make sense
-                                                   )]
+                                                     (expandPosn newGame color n neigh)))]
                                    [[color (if (= posn p1) 0 1)] gameposns])))
                 [[color n] neighs] (apply min-key #(count (nth % 1)) (seq stuff))]
-            (if (= *thoroughness* 0)
-              (filter possible? neighs)
-              neighs))))
+            (filter possible? neighs))))
 
 (defn solve-flow
   "Takes a board and solves it. Optionally takes :threads (default 1) and :update-fn to call on each dequeued item."
