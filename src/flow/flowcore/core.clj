@@ -10,7 +10,6 @@
 (def ^:dynamic *thoroughness* 0)
 ; 0 = don't do possible? while counting neighbors
 ; 1 = filter possible? while counting neighbors
-; 2 = filter possible? AND quickfill while counting neighbors
 ; presumably, a higher thoroughness increases the time but decreases the growth.
 
 (defn check-for-bending
@@ -55,7 +54,8 @@
                                        gameposns (case *thoroughness*
                                                    0 gameposns
                                                    1 (filter possible? gameposns)
-                                                   2 (filter this (filter possible? gameposns)))]
+                                                   ;thoroughness of 2 doesn't make sense
+                                                   )]
                                    [[color (if (= posn p1) 0 1)] gameposns])))
                 [[color n] neighs] (apply min-key #(count (nth % 1)) (seq stuff))]
             (if (= *thoroughness* 0)
