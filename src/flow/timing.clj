@@ -47,7 +47,4 @@
   (with-open [output-port (io/writer (io/file filename))]
     (binding [*out* output-port]
       (get-stats))))
-
-(log-stats "benchmarks_minimal.log")
-
 ;(time (solve-flow-graphic (file->grid "/home/alex/temp/Flowpuzzles/11x11/IMG_1391.PNG" 11 11)))
