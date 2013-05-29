@@ -4,6 +4,11 @@
         flow.reader)
   (:require [clojure.java.io :as io]))
 
+(defn round-to-digits
+  [n round-to]
+  (let [ten-to-the (int (Math/pow 10 round-to))]
+    (double (/ (Math/floor (* n ten-to-the)) ten-to-the))))
+
 (defn batch-do
   [folder x y]
   (doseq
@@ -17,34 +22,43 @@
         (println true))
       )))
 
-(defn average-time
+(defn time-data
   [folder puzzle-size]
-  (let [s (for [f (file-seq (clojure.java.io/file folder))
-                :when (not (.isDirectory f))]
-            (let [n (.getAbsolutePath f)
-                  a (flow.seesaw/time-val (solve-flow-graphic (file->grid n puzzle-size)))
-                  ;_ (println a " milliseconds")
-                  ]
-              a))]
-    (/ (apply + s) (count s))))
-
-;(time (solve-flow-graphic (file->grid "/home/alex/temp/sample14x14.JPG" 14 14)))
+  (for [f (file-seq (clojure.java.io/file folder))
+        :when (not (.isDirectory f))]
+    (let [n (.getAbsolutePath f)
+          a (-> (file->grid n puzzle-size)
+              solve-flow-graphic
+              time-val
+              (/ 1000)
+              double)
+          ;_ (println a " milliseconds")
+          ]
+      a)))
 
 (defn get-stats
-  []
+  [& {from :from to :to :or {from 5 to 13}}]
   (let [path "/home/alex/temp/Flowpuzzles/"]
-    (doseq [n (range 5 14)]
-      (println "Computing average time for" (str n "x" n))
-      (println "Average time for" (str n "x" n) ":"
-               (double (/ (average-time (str path n "x" n "/") n)
-                          1000))
-               "seconds"))))
-
-;(get-stats)
+    (doseq [n (range from (inc to))]
+      (let [s (map #(round-to-digits % 2)
+                   (time-data (str path n "x" n "/") n))]
+        (println "         Computing times for" (str n "x" n))
+        (print "Data set: ")
+        (doseq [x s]
+          (print x ""))
+        (println)
+        (println "Minimum time:"
+                 (apply min s)
+                 "seconds")
+        (println "Maximum time:"
+                 (apply max s)
+                 "seconds")
+        (println "Average time:"
+                 (round-to-digits (/ (apply + s) (count s)) 2)
+                 "seconds")))))
 
 (defn log-stats
-  [filename]
+  [filename & args]
   (with-open [output-port (io/writer (io/file filename))]
     (binding [*out* output-port]
-      (get-stats))))
-;(time (solve-flow-graphic (file->grid "/home/alex/temp/Flowpuzzles/11x11/IMG_1391.PNG" 11 11)))
+      (apply get-stats args))))
