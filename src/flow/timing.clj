@@ -1,7 +1,8 @@
 (ns flow.timing
   (:use flow.seesaw
         flow.graphics
-        flow.reader))
+        flow.reader)
+  (:require [clojure.java.io :as io]))
 
 (defn batch-do
   [folder x y]
@@ -32,7 +33,7 @@
 (defn get-stats
   []
   (let [path "/home/alex/temp/Flowpuzzles/"]
-    (doseq [n (range 5 12)]
+    (doseq [n (range 5 14)]
       (println "Computing average time for" (str n "x" n))
       (println "Average time for" (str n "x" n) ":"
                (double (/ (average-time (str path n "x" n "/") n)
@@ -40,5 +41,11 @@
                "seconds"))))
 
 ;(get-stats)
+
+(defn log-stats
+  [filename]
+  (with-open [output-port (io/writer (io/file filename))]
+    (binding [*out* output-port]
+      (get-stats))))
 
 ;(time (solve-flow-graphic (file->grid "/home/alex/temp/Flowpuzzles/11x11/IMG_1391.PNG" 11 11)))
