@@ -19,9 +19,15 @@
                 :when (= (get-in board [x y]) \*)]
             (let [neighs (quick-neighbors board [x y])
                   neighs (filter #(or (= (get-in board %) \*)(lowcase? (get-in board %))) neighs) ;no upcase
+                  wall-colors (set (map lowcase
+                                        (filter #(and
+                                                   (not (= % \*))
+                                                   (upcase? %))
+                                                (map #(get-in board %) neighs))))
                   heads (filter #(and
                                    (not (= (get-in board %) \*))
                                    (lowcase? (get-in board %))) neighs)
+                  heads (filter #(not (contains? wall-colors %)) heads) ;a head can't come in if its wall is present (because it'd create bending)
                   empties (filter #(= (get-in board %) \*) neighs)
                   freq (frequencies (map #(get-in board %) heads))
                   dupe-color? (first (for [[k v] freq :when (>= v 2)] k))

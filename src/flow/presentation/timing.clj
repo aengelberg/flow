@@ -1,4 +1,4 @@
-(ns flow.timing
+(ns flow.presentation.timing
   (:use flow.seesaw
         flow.graphics
         flow.reader)
