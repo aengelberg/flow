@@ -63,15 +63,20 @@
         (let [item (get-in board [i j])
               the-color (get colormap (lowcase item) (color :white))
               x (* j cell-width)
-              y (* i cell-height)]
+              y (* i cell-height)
+              same-neighs (count (filter #(= (lowcase item)(lowcase (get-in board %)))
+                                         (quick-neighbors board [i j])))]
           (draw g2d
                 (rect x y cell-width cell-height)
                 (style :foreground (color :white)
                        :background (color :black)
                        :stroke (stroke :width (* 0.01 cell-width))))
-          (if (and (not (= item \*))(< (count (filter #(= (lowcase item)(lowcase (get-in board %)))
-                                                    (quick-neighbors board [i j])))
-                                       2))
+          (if (or (and (not (= item \*))
+                       (upcase? item)
+                       (= same-neighs 1))
+                  (and (not (= item \*))
+                       (lowcase? item)
+                       (= same-neighs 0)))
             (draw g2d
                   (ellipse (+ x padding) (+ y padding) (- cell-width (* padding 2)) (- cell-height (* padding 2)))
                   (style :background the-color)))
