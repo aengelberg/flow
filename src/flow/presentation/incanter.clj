@@ -12,7 +12,9 @@
 
 (def minimal-graph
   (charts/xy-plot (map first minimal-data-vecs)
-                  (map second minimal-data-vecs) :title "Strategy #1"))
+                  (map second minimal-data-vecs) :title "Strategy #1"
+                  :x-label "Puzzle size"
+                  :y-label "Average time to solve"))
 
 (def medium-data-vecs
   [[5 0.03]
@@ -26,7 +28,9 @@
 
 (def medium-graph
   (charts/xy-plot (map first minimal-data-vecs)
-                  (map second minimal-data-vecs) :title "Strategy #2"))
+                  (map second minimal-data-vecs) :title "Strategy #2 (with quickfill)"
+                  :x-label "Puzzle size"
+                  :y-label "Average time to solve"))
 
 (charts/add-lines medium-graph
                   (map first medium-data-vecs)
@@ -44,7 +48,9 @@
 
 (def best-graph
   (charts/xy-plot (map first minimal-data-vecs)
-                  (map second minimal-data-vecs) :title "Strategy #3"))
+                  (map second minimal-data-vecs) :title "Strategy #3"
+                  :x-label "Puzzle size"
+                  :y-label "Average time to solve"))
 (charts/add-lines best-graph
                   (map first medium-data-vecs)
                   (map second medium-data-vecs))
