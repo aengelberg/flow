@@ -11,7 +11,9 @@
   {[:iphone4 true] (/ 64 480)
    [:iphone4 false] (/ 180 960)
    [:iphone5 true] (/ 216 1136)
-   [:ipad true] (/ 95 1024)})  ;note: these are in RATIOS, not actual pixel amounts.
+   [:iphone5 false] (/ 269 1136)
+   [:ipad true] (/ 95 1024)
+   [:ipad false] (/ 143 1024)})  ;note: these are in RATIOS, not actual pixel amounts.
 
 (def ratios
   {(/ 640 1136) :iphone5
