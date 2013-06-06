@@ -5,7 +5,7 @@ The source code for an (unofficial) solver I'm working on for the mobile puzzle 
 
 If you want to try it out, click <a href="https://drive.google.com/folderview?id=0B9M-PlzkHv3ZcTYycHRKUk1CWFE&usp=sharing">here</a> for the uberjars.
 
-The current version is 0.1.1.
+The current version is 0.1.2.
 
 Usage
 ---
