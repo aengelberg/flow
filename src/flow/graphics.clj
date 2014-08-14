@@ -5,7 +5,7 @@
   (:use flow.flowcore.core
         flow.flowcore.base
         flow.samplegrids
-        flow.reader))
+        flow.reader)) 
 
 (def flow-width 500)
 (def flow-height 500)
