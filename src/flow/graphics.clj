@@ -2,7 +2,7 @@
   (:use seesaw.core
         seesaw.graphics
         seesaw.color)
-  (:use flow.flowcore.core
+  (:use flow.loco
         flow.flowcore.base
         flow.samplegrids
         flow.reader)) 
@@ -108,10 +108,10 @@
   [board]
   (reset! the-board board)
   (show! (pack! f))
-  (solve-flow @the-board
-              :update-fn #(let [board (:board %)]
-                            (reset! the-board board)
-                            (repaint! c))))
+  (when-let [new-board (solve-flow @the-board)]
+    (reset! the-board new-board)
+    (repaint! c)
+    true))
 ;(time (solve-flow-graphic (file->grid "photo.PNG" 14 14)))
 ;(time (solve-flow-graphic (-> (for [i (range 8)]
 ;                                (for [j (range 8)]
